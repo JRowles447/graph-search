@@ -92,6 +92,70 @@ class Graph:
             i += 1
 
 
+    def ids(self):
+        print('ids')
+        print(self.goal_vertices)
+        vertices = self.vertices
+
+        depth_lim = 0
+        while not self.complete:
+            depth = 0
+            print("depth_lim = " + str(depth_lim))
+            print("depth in ids is " + str(depth))
+
+            queue = LifoQueue()
+            queue.put(vertices['S'])
+            self.path.append('S')
+            while not queue.empty():
+                curr = queue.get()
+                curr.edges.sort()
+                print(curr.edges)
+                i = 0
+                while (i < len(curr.edges)):
+                    adjacent = curr.edges[i]
+                    if not vertices[adjacent[0]].visited and vertices[adjacent[0]] not in self.goal_vertices and not self.complete:
+                        if(depth < depth_lim):
+                            self.ids_visit(vertices[adjacent[0]], curr.edges[i][1], depth+1, depth_lim)
+                        else:
+                            pass
+                    else:
+                        return
+                    i += 1
+            for x in vertices:
+                vertices[x].visited = False
+            depth_lim+=1
+
+    def ids_visit(self, curr, cost, depth, depth_lim):
+        print(str(curr.id) + " searched at depth: " + str(depth) + " with depth_lim: " + str(depth_lim))
+
+
+        vertices = self.vertices
+        print("curr depth_lim is: " + str(depth_lim))
+        print("curr depth is: " + str(depth))
+
+        # sort the edges alpha
+        self.path_cost += cost
+        self.path.append(curr.id)
+        curr.visited = True
+
+        curr.edges.sort()
+        i = 0
+        while (i < len(curr.edges)) and not self.complete:
+            adjacent = curr.edges[i]
+            # print(vertices[adjacent[0]].id)
+            if not vertices[adjacent[0]].visited and vertices[adjacent[0]].id not in self.goal_vertices:
+                if (depth < depth_lim):
+                    self.ids_visit(vertices[adjacent[0]], curr.edges[i][1], depth+1, depth_lim)
+                else:
+                    return
+            else:
+                self.path.append(vertices[adjacent[0]].id)
+                self.path_cost += curr.edges[i][1]
+                self.complete = True
+                return
+            i += 1
+
+
 
 
 def parse_file(filename):
