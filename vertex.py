@@ -21,7 +21,10 @@ class Vertex:
         self.estimated = estimated
         self.path_cost = -1
         self.visited = False
+        # list of tuples of form (vertex, path_cost)
         self.edges = []
 
-
+    def info(self):
+        edge_string = str(self.edges)
+        print("Vertex: " + self.id + " with edges: " + edge_string)
 

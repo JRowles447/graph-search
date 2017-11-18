@@ -15,13 +15,23 @@ def parse_file(filename):
     print('gets to parse')
     reader = open(filename, 'r')
     num_vertices = int(reader.readline())
-    vertices = []
+    vertices = {}
     while num_vertices:
         line = reader.readline()
         print(line)
         line = line.split(' ')
-        vertices.append(Vertex(line[0], line[1]))
+        vertices[line[0]] = Vertex(line[0], line[1])
         num_vertices -= 1
+    line = reader.readline()
+    while line:
+        print(line)
+        edge = line.split(' ')
+        vertices[edge[0]].edges.append((edge[1], int(edge[2])))
+        line = reader.readline()
+
+    for k, v in vertices.items():
+        print(k, v)
+        v.info()
     return None
 
 if __name__ == '__main__':
