@@ -2,7 +2,7 @@ from itertools import chain
 from math import sqrt
 from random import choice
 from vertex import Vertex
-from queue import Queue
+from queue import Queue, LifoQueue
 
 
 class Graph:
@@ -13,12 +13,25 @@ class Graph:
         self.goal_vertices = goal_vertices
         self.path_cost = 0
         self.path = []
+        self.complete = False
+
+    def solve(self):
+        if self.search_type == 'bfs':
+            self.bfs()
+        elif self.search_type == 'dfs':
+            self.dfs()
+        elif self.search_type == 'ids':
+            self.ids()
+        else:
+            self.astar()
+        print(self.path_cost)
+        for x in self.path:
+            print(x)
 
     def bfs(self):
         print('bfs')
         vertices = self.vertices
-        for k, v in vertices.items():
-            v.info()
+
         queue = Queue()
         queue.put(vertices['S'])
         self.path.append('S')
@@ -36,30 +49,65 @@ class Graph:
                     return
                 i+=1
 
+    def dfs(self):
+        print('dfs')
+        print(self.goal_vertices)
+        vertices = self.vertices
+
+        queue = LifoQueue()
+        queue.put(vertices['S'])
+        self.path.append('S')
+        while not queue.empty():
+            curr = queue.get()
+            curr.edges.sort()
+            print(curr.edges)
+            i = 0
+            while (i < len(curr.edges)) and not self.complete:
+                adjacent = curr.edges[i]
+                if not vertices[adjacent[0]].visited and vertices[adjacent[0]] not in self.goal_vertices and not self.complete:
+                    self.dfs_visit(vertices[adjacent[0]], curr.edges[i][1])
+                else:
+                    return
+                i += 1
+
+    def dfs_visit(self, curr, cost):
+        vertices = self.vertices
+
+        # sort the edges alpha
+        self.path_cost += cost
+        self.path.append(curr.id)
+        curr.visited = True
+        curr.edges.sort()
+        i = 0
+        while (i < len(curr.edges)) and not self.complete:
+            adjacent = curr.edges[i]
+            # print(vertices[adjacent[0]].id)
+            if not vertices[adjacent[0]].visited and vertices[adjacent[0]].id not in self.goal_vertices:
+                self.dfs_visit(vertices[adjacent[0]], curr.edges[i][1])
+            else:
+                self.path.append(vertices[adjacent[0]].id)
+                self.path_cost += curr.edges[i][1]
+                self.complete = True
+                return
+            i += 1
+
 
 
 
 def parse_file(filename):
-    print('gets to parse')
     reader = open(filename, 'r')
     num_vertices = int(reader.readline())
     vertices = {}
     while num_vertices:
         line = reader.readline()
-        print(line)
         line = line.split(' ')
         vertices[line[0]] = Vertex(line[0], line[1])
         num_vertices -= 1
     line = reader.readline()
     while line:
-        print(line)
         edge = line.split(' ')
         vertices[edge[0]].edges.append((edge[1], int(edge[2])))
         line = reader.readline()
-
-    for k, v in vertices.items():
-        print(k, v)
-        v.info()
     return vertices
 
 if __name__ == '__main__':
@@ -78,5 +126,7 @@ if __name__ == '__main__':
 
     graph = Graph(vertice_dict, args.search, args.start_state, goal_vertices)
 
-    graph.bfs()
+    graph.solve()
+
+    # graph.bfs()
 
